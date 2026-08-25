@@ -1,0 +1,16 @@
+{
+  "//": "Merge into <project>/.tabnine/agent/settings.json. Adjust the path to wherever this quality pack is checked out.",
+  "hooks": {
+    "AfterAgent": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /path/to/code-quality/hooks/after-iteration.sh --format tabnine",
+            "name": "quality-gate"
+          }
+        ]
+      }
+    ]
+  }
+}

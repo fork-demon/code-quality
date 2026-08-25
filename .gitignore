@@ -1,0 +1,4 @@
+.DS_Store
+.qcheck/
+*.log
+.claude/

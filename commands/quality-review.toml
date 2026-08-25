@@ -1,0 +1,26 @@
+# /quality-review [optional: files, PR, or branch to review]
+# Multi-agent quality review of the current change.
+
+description = "Multi-perspective quality review (design, tests, maintainability, security) of the current diff"
+
+prompt = """
+Run a multi-agent quality review following the `multi-agent-quality-review`
+skill (skills/multi-agent-quality-review/SKILL.md in the quality pack).
+
+Target: {{args}}
+If no target was given above, review the current working-tree diff against the
+repository's base branch (origin/main or origin/master, whichever exists);
+include untracked source files.
+
+Steps:
+1. Collect the diff and the surrounding context of each touched file.
+2. Run the four reviewer lenses (design, tests, maintainability, security) —
+   in parallel subagents if this environment supports subagents, otherwise as
+   four separate sequential passes.
+3. Merge per the skill's merge step: dedupe, verify blockers/majors against the
+   real code, then report verdict (pass / pass-with-minors / fail) with
+   findings grouped by severity, each as `file:line — issue — fix`.
+
+Do not modify any code during the review. After reporting, offer to apply the
+fixes.
+"""

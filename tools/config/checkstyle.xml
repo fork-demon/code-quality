@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+  "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+  "https://checkstyle.org/dtds/configuration_1_3.dtd">
+<!--
+  qcheck curated Checkstyle ruleset: high-signal correctness and hygiene checks
+  only. Deliberately excludes whitespace/formatting rules (a formatter's job)
+  so agent-facing findings stay meaningful.
+-->
+<module name="Checker">
+  <property name="severity" value="error"/>
+  <property name="charset" value="UTF-8"/>
+
+  <module name="TreeWalker">
+    <!-- Correctness -->
+    <module name="EqualsHashCode"/>
+    <module name="StringLiteralEquality"/>
+    <module name="MissingSwitchDefault"/>
+    <module name="DefaultComesLast"/>
+    <module name="FallThrough"/>
+    <module name="EqualsAvoidNull"/>
+    <module name="ModifiedControlVariable"/>
+    <module name="PackageDeclaration"/>
+    <module name="CovariantEquals"/>
+
+    <!-- Error handling -->
+    <module name="EmptyCatchBlock">
+      <property name="exceptionVariableName" value="expected|ignored"/>
+    </module>
+    <module name="IllegalCatch">
+      <property name="illegalClassNames"
+                value="java.lang.Exception, java.lang.Throwable, java.lang.RuntimeException"/>
+    </module>
+    <module name="IllegalThrows"/>
+
+    <!-- Design & hygiene -->
+    <module name="VisibilityModifier">
+      <property name="allowPublicFinalFields" value="true"/>
+      <property name="allowPublicImmutableFields" value="true"/>
+    </module>
+    <module name="FinalClass"/>
+    <module name="HideUtilityClassConstructor"/>
+    <module name="OneTopLevelClass"/>
+    <module name="InnerAssignment"/>
+    <module name="UnusedImports"/>
+    <module name="RedundantImport"/>
+    <module name="IllegalImport"/>
+    <module name="AvoidStarImport"/>
+    <module name="MethodLength">
+      <property name="max" value="80"/>
+    </module>
+    <module name="ParameterNumber">
+      <property name="max" value="6"/>
+    </module>
+    <module name="NestedIfDepth">
+      <property name="max" value="3"/>
+    </module>
+    <module name="NestedTryDepth">
+      <property name="max" value="1"/>
+    </module>
+    <module name="BooleanExpressionComplexity">
+      <property name="max" value="4"/>
+    </module>
+    <module name="MagicNumber">
+      <property name="ignoreNumbers" value="-1, 0, 1, 2"/>
+      <property name="ignoreHashCodeMethod" value="true"/>
+      <property name="ignoreAnnotation" value="true"/>
+    </module>
+
+    <!-- Naming -->
+    <module name="TypeName"/>
+    <module name="MethodName"/>
+    <module name="MemberName"/>
+    <module name="LocalVariableName"/>
+    <module name="ConstantName"/>
+    <module name="PackageName"/>
+
+    <!-- Logging, not printing -->
+    <module name="Regexp">
+      <property name="format" value="System\.(out|err)\.print"/>
+      <property name="illegalPattern" value="true"/>
+      <property name="ignoreComments" value="true"/>
+      <property name="message" value="Use the project logger instead of System.out/System.err"/>
+    </module>
+    <module name="Regexp">
+      <property name="format" value="\.printStackTrace\(\)"/>
+      <property name="illegalPattern" value="true"/>
+      <property name="ignoreComments" value="true"/>
+      <property name="message" value="Log the exception via the project logger instead of printStackTrace()"/>
+    </module>
+  </module>
+
+  <!-- File-level -->
+  <module name="FileLength">
+    <property name="max" value="600"/>
+  </module>
+  <module name="LineLength">
+    <property name="max" value="140"/>
+    <property name="ignorePattern" value="^ *\* *[^ ]+$|href|http://|https://"/>
+  </module>
+</module>
