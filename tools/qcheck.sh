@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
 #
-# qcheck — simple Checkstyle + PMD gate for Java files.
+# qcheck — simple Checkstyle + PMD gate for Java files, with optional
+# Snyk (SAST + dependency vulns) and SonarQube quality-gate checks.
 #
 #   tools/qcheck.sh [file.java ...]
 #
 # With no arguments, checks the Java files changed in the git working tree
 # (vs HEAD, plus staged and untracked). Exits 0 when clean, 1 when findings
 # exceed the configured budget, 2 on execution errors.
+#
+# Snyk and Sonar are OFF by default: they scan the whole project (not just
+# changed files), need their own auth/server, and are too slow for an
+# after-every-iteration hook. Enable them in qcheck.conf for pre-commit/CI
+# or on-demand /quality-gate runs.
 #
 # Configuration: tools/config/qcheck.conf (key=value). Scanner jars are
 # downloaded once into ~/.qcheck/tools (override with QCHECK_HOME).
@@ -25,6 +31,11 @@ PMD_VERSION=7.10.0
 CHECKSTYLE_RULESET="$CONFIG_DIR/checkstyle.xml"
 PMD_RULESET="$CONFIG_DIR/pmd.xml"
 MAX_VIOLATIONS=0        # gate fails when total findings exceed this
+
+SNYK_ENABLED=false            # snyk code test (SAST) — needs `snyk auth` once
+SNYK_DEPS_ENABLED=false       # snyk test (dependency vulnerabilities)
+SNYK_SEVERITY_THRESHOLD=low   # low | medium | high | critical
+SONAR_ENABLED=false           # sonar-scanner + server-side quality gate
 
 CONF_FILE="$CONFIG_DIR/qcheck.conf"
 if [[ -f "$CONF_FILE" ]]; then
@@ -53,10 +64,19 @@ else
 fi
 
 if [[ ${#FILES[@]} -eq 0 ]]; then
-  log "no Java files to check — pass"
-  exit 0
+  # Snyk/Sonar scan the whole project, so they still run (a build.gradle
+  # change can introduce a vulnerable dependency with zero .java files
+  # touched).
+  if [[ "$SNYK_ENABLED" != "true" && "$SNYK_DEPS_ENABLED" != "true" && "$SONAR_ENABLED" != "true" ]]; then
+    log "no Java files to check — pass"
+    exit 0
+  fi
+  CHECKSTYLE_ENABLED=false
+  PMD_ENABLED=false
+  log "no changed Java files — running project-level scanners only"
+else
+  log "checking ${#FILES[@]} Java file(s)"
 fi
-log "checking ${#FILES[@]} Java file(s)"
 
 # ---------- fetch tools (once) ----------
 mkdir -p "$QCHECK_HOME"
@@ -83,7 +103,7 @@ fi
 
 # ---------- run scanners ----------
 TMP_OUT="$(mktemp -t qcheck)"
-trap 'rm -f "$TMP_OUT" "$TMP_OUT.pmd" "$TMP_OUT.files"' EXIT
+trap 'rm -f "$TMP_OUT" "$TMP_OUT.pmd" "$TMP_OUT.files" "$TMP_OUT.snyk" "$TMP_OUT.snykdeps" "$TMP_OUT.sonar"' EXIT
 TOTAL=0
 
 if [[ "$CHECKSTYLE_ENABLED" == "true" ]]; then
@@ -107,6 +127,74 @@ if [[ "$PMD_ENABLED" == "true" ]]; then
     grep ':[0-9]*:' "$TMP_OUT.pmd" | sed "s|$PWD/||"
   fi
   TOTAL=$((TOTAL + PMD_COUNT))
+fi
+
+# Snyk: whole-project scans via the snyk CLI. Exit codes: 0 clean, 1 issues,
+# 2 error, 3 no supported files. Findings are the "✗ ..." lines.
+if [[ "$SNYK_ENABLED" == "true" || "$SNYK_DEPS_ENABLED" == "true" ]]; then
+  command -v snyk >/dev/null 2>&1 \
+    || die "snyk CLI not found — install it and run 'snyk auth' once"
+fi
+
+if [[ "$SNYK_ENABLED" == "true" ]]; then
+  SNYK_STATUS=0
+  snyk code test --severity-threshold="$SNYK_SEVERITY_THRESHOLD" \
+      >"$TMP_OUT.snyk" 2>&1 || SNYK_STATUS=$?
+  case $SNYK_STATUS in
+    0) : ;;
+    1)
+      SNYK_COUNT=$(grep -c '✗' "$TMP_OUT.snyk" || true)
+      [[ "$SNYK_COUNT" -eq 0 ]] && SNYK_COUNT=1
+      echo "── snyk code ($SNYK_COUNT) ────────────────────────────"
+      grep -A2 '✗' "$TMP_OUT.snyk" | sed "s|$PWD/||"
+      TOTAL=$((TOTAL + SNYK_COUNT))
+      ;;
+    3) log "snyk code: no supported files — skipped" ;;
+    *) die "snyk code test failed to run: $(tail -n 3 "$TMP_OUT.snyk")" ;;
+  esac
+fi
+
+if [[ "$SNYK_DEPS_ENABLED" == "true" ]]; then
+  SNYK_STATUS=0
+  snyk test --severity-threshold="$SNYK_SEVERITY_THRESHOLD" \
+      >"$TMP_OUT.snykdeps" 2>&1 || SNYK_STATUS=$?
+  case $SNYK_STATUS in
+    0) : ;;
+    1)
+      DEPS_COUNT=$(grep -c '✗' "$TMP_OUT.snykdeps" || true)
+      [[ "$DEPS_COUNT" -eq 0 ]] && DEPS_COUNT=1
+      echo "── snyk dependencies ($DEPS_COUNT) ────────────────────"
+      grep '✗' "$TMP_OUT.snykdeps"
+      TOTAL=$((TOTAL + DEPS_COUNT))
+      ;;
+    3) log "snyk deps: no supported manifest — skipped" ;;
+    *) die "snyk test failed to run: $(tail -n 3 "$TMP_OUT.snykdeps")" ;;
+  esac
+fi
+
+# Sonar: run the scanner and wait for the SERVER-side quality gate verdict
+# (-Dsonar.qualitygate.wait=true makes sonar-scanner exit non-zero when the
+# project's quality gate fails). Project settings come from
+# sonar-project.properties or SONAR_* variables in qcheck.conf/environment.
+if [[ "$SONAR_ENABLED" == "true" ]]; then
+  command -v sonar-scanner >/dev/null 2>&1 \
+    || die "sonar-scanner not found — install the SonarScanner CLI"
+  [[ -n "${SONAR_HOST_URL:-}" && -n "${SONAR_TOKEN:-}" ]] \
+    || die "SONAR_HOST_URL and SONAR_TOKEN must be set for the sonar check"
+  SONAR_STATUS=0
+  sonar-scanner -Dsonar.qualitygate.wait=true \
+      ${SONAR_PROJECT_KEY:+-Dsonar.projectKey="$SONAR_PROJECT_KEY"} \
+      >"$TMP_OUT.sonar" 2>&1 || SONAR_STATUS=$?
+  if [[ $SONAR_STATUS -ne 0 ]]; then
+    if grep -qi 'QUALITY GATE STATUS: FAILED' "$TMP_OUT.sonar"; then
+      echo "── sonar (quality gate FAILED) ────────────────────────"
+      grep -iE 'quality gate|condition' "$TMP_OUT.sonar" | sed 's/^[^ ]* *//'
+      log "full report on the Sonar server (see dashboard link above)"
+      TOTAL=$((TOTAL + 1))
+    else
+      die "sonar-scanner failed to run: $(tail -n 5 "$TMP_OUT.sonar")"
+    fi
+  fi
 fi
 
 # ---------- verdict ----------

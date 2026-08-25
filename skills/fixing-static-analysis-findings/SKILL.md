@@ -1,8 +1,8 @@
 ---
 name: fixing-static-analysis-findings
 description: >
-  How to respond when static analysis (Checkstyle, PMD, linters, the qcheck
-  gate) reports findings on your changes. Use whenever a quality gate or hook
+  How to respond when static analysis (Checkstyle, PMD, Snyk, SonarQube,
+  linters, the qcheck gate) reports findings on your changes. Use whenever a quality gate or hook
   fails, or a lint/analysis report needs to be resolved.
 ---
 

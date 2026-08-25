@@ -45,6 +45,14 @@ tools/qcheck.sh src/Foo.java    # or explicit files
   `curl`, `unzip`).
 - Config in `tools/config/qcheck.conf` (enable/disable tools, versions,
   ruleset overrides, findings budget).
+- **Optional Snyk + Sonar** (off by default): `SNYK_ENABLED` runs
+  `snyk code test` (SAST), `SNYK_DEPS_ENABLED` runs `snyk test` (vulnerable
+  dependencies), `SONAR_ENABLED` runs `sonar-scanner` and fails the gate when
+  the server-side quality gate fails (`sonar.qualitygate.wait`). These scan
+  the whole project and need their own auth (snyk CLI + `snyk auth`;
+  sonar-scanner + `SONAR_HOST_URL`/`SONAR_TOKEN`), so enable them for
+  pre-commit/CI or `/quality-gate` runs — keep the per-iteration hook on the
+  fast Checkstyle/PMD pair.
 - Curated rulesets in `tools/config/` — correctness/security/design signal
   only, no formatting noise.
 - Exit codes: `0` pass, `1` findings over budget, `2` execution error.
