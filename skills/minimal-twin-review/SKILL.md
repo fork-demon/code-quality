@@ -14,23 +14,32 @@ the thing generated code gets wrong most. The method: build the smallest
 correct implementation of the same task, then justify every line the real
 diff has beyond it.
 
-## Step 1 — State the task, without leaking the implementation
+## Step 1 — State the task as acceptance criteria
 
-The twin is only a fair yardstick if its task statement could have been
-written *before* the change existed. Take it from the first available source:
+The twin is only a fair yardstick if its brief could have been written before
+the change existed and cannot describe a solution. So the brief is never
+prose about the code: it is **acceptance criteria in Given / When / Then
+form** — observable behaviour at the public surface, nothing about types,
+methods, patterns or files. That format cannot leak structure, however the
+change was produced. Take the criteria from the first available source:
 
-1. The task as given — the user's original request in this conversation, the
-   ticket, or the PR description. Quote it; do not paraphrase.
-2. If none is available, the commit messages.
-3. Only as a last resort, infer it from the diff — and if you do, say so in
-   the report, because the twin is then weaker.
+1. **Feature files.** Scenarios added or changed by the diff (`*.feature`,
+   Cucumber/BDD). Use them verbatim. This is the deterministic case.
+2. **Criteria confirmed by the developer.** In `/done`, condense everything
+   the user asked for in this conversation — however many prompts, including
+   corrections — into 3–6 scenarios and ask "is this what you asked for?"
+   before continuing. Once confirmed, they go into the commit message under
+   `Acceptance criteria:` so later reviews find them.
+3. **Criteria already recorded** in the commit message, PR description or
+   ticket.
+4. **Extracted.** Only when none of the above exist (reviewing an old
+   change): derive scenarios from the tests the diff adds and from the
+   diff's observable behaviour — inputs, outputs, exceptions, side effects.
+   Say in the report that the criteria were extracted; the twin is weaker.
 
-Rules for the statement, whatever its source: one or two sentences; describe
-**behaviour and contracts only** — what must be true afterwards, what must
-not change. Never mention types, classes, methods, patterns, files or the
-shape of the solution ("a validator", "a config object", "a strategy").
-Write it before reading the diff in detail. If the task is unclear, ask the
-user rather than guess.
+Also list the contracts that must not change (existing public API, existing
+tests). If the criteria are unclear or contradictory, ask the user; do not
+guess.
 
 ## Step 2 — Build the twin (isolated)
 
