@@ -1,14 +1,29 @@
 {
-  "//": "Merge into <project>/.tabnine/agent/settings.json. enableAgents turns on custom subagents (agents/twin-builder.md). The AfterAgent hook is optional: it fires once when the agent finishes a turn — never per tool call — runs the repo's OWN build checks, and on failure returns decision=deny so the agent gets the build output and keeps working. Requires jq. Swap the gradle task for your build (mvn -q verify).",
-  "experimental": { "enableAgents": true },
+  "//": "Merge into <project>/.tabnine/agent/settings.json (or ~/.tabnine/agent/settings.json). enableAgents turns on the twin-builder subagent. Both hooks are one-liners; neither is a script of ours. Needs jq.",
+  "//prompt-log": "BeforeAgent fires on every prompt the developer submits. This records it (skipping slash commands) to .git/qc-prompts/<branch>.md — per branch, never committed — so /done and /quality-review can build the twin's brief from what was actually asked, however many prompts it took. Delete the file to forget a branch.",
+  "//build-checks": "AfterAgent fires once when the agent finishes a turn — never per tool call. Runs the repo's OWN build checks; on failure returns decision=deny so the agent sees the output and keeps working. Swap the gradle task for your build (mvn -q verify).",
+  "experimental": {
+    "enableAgents": true
+  },
   "hooks": {
+    "BeforeAgent": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "name": "prompt-log",
+            "timeout": 5000,
+            "command": "bash -c 'mkdir -p .git/qc-prompts && jq -r \"select(.prompt|startswith(\\\"/\\\")|not) | \\\"- \\\" + (.prompt|gsub(\\\"\\\\n\\\";\\\" \\\"))\" >> \".git/qc-prompts/$(git branch --show-current 2>/dev/null | tr / _).md\"'"
+          }
+        ]
+      }
+    ],
     "AfterAgent": [
       {
         "hooks": [
           {
             "type": "command",
             "name": "build-checks",
-            "description": "Repo build checks must be green before the agent is done",
             "timeout": 600000,
             "command": "bash -c 'O=$(./gradlew -q check 2>&1) || jq -n --arg r \"$O\" '\"'\"'{decision:\"deny\",reason:(\"Build checks failed. Fix the code at the root cause — do not edit rulesets, thresholds or add suppressions.\\n\\n\"+$r)}'\"'\"''"
           }

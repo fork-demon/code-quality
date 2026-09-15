@@ -9,10 +9,12 @@ Finish the current task following the `code-quality-core` definition of done:
    thresholds, baselines or exclude lists, and never add blanket suppressions;
    a single-line, single-rule suppression is allowed only for a demonstrable
    false positive with a justifying comment, and must be listed in step 4.
-2. Condense everything the user asked for in this conversation — every
-   prompt, including corrections and reversals — into 3–6 Given/When/Then
-   acceptance criteria and ask "is this what you asked for?". Use scenarios
-   from any `*.feature` files in the diff verbatim. Wait for confirmation.
+2. Build the acceptance criteria per the `minimal-twin-review` skill's
+   step 1 ladder: `*.feature` scenarios in the diff verbatim; else the
+   harness prompt log `.git/qc-prompts/<branch>.md` (all prompts on this
+   branch, corrections included, last word wins); else this conversation.
+   Condense to 3–6 Given/When/Then scenarios, ask "is this what you asked
+   for?", and wait for confirmation.
 3. Run the `minimal-twin-review` skill with the confirmed criteria as the
    brief. Apply the delete list — deletions first — then re-run step 1.
 4. Confirm every criterion has a test at its boundaries

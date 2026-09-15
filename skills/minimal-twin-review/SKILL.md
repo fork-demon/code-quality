@@ -24,18 +24,24 @@ methods, patterns or files. That format cannot leak structure, however the
 change was produced. Take the criteria from the first available source:
 
 1. **Feature files.** Scenarios added or changed by the diff (`*.feature`,
-   Cucumber/BDD). Use them verbatim. This is the deterministic case.
-2. **Criteria confirmed by the developer.** In `/done`, condense everything
-   the user asked for in this conversation — however many prompts, including
-   corrections — into 3–6 scenarios and ask "is this what you asked for?"
-   before continuing. Once confirmed, they go into the commit message under
-   `Acceptance criteria:` so later reviews find them.
-3. **Criteria already recorded** in the commit message, PR description or
-   ticket.
-4. **Extracted.** Only when none of the above exist (reviewing an old
+   Cucumber/BDD). Use them verbatim. The strongest case, not a requirement.
+2. **The harness prompt log.** If `.git/qc-prompts/<branch>.md` exists (the
+   `prompt-log` hook records every prompt the developer typed on this
+   branch, in order), condense the whole log — every request, including
+   corrections and reversals; the last word wins — into 3–6 scenarios. Show
+   them to the developer with "is this what you asked for?" and wait. This
+   needs no discipline from anyone: the harness wrote the log.
+3. **Criteria already recorded** in the commit message (`Acceptance
+   criteria:`), PR description or ticket.
+4. **The conversation**, if it holds the requests and there is no log.
+5. **Extracted.** Only when none of the above exist (reviewing an old
    change): derive scenarios from the tests the diff adds and from the
    diff's observable behaviour — inputs, outputs, exceptions, side effects.
    Say in the report that the criteria were extracted; the twin is weaker.
+
+Whatever the source, the criteria go into the commit message under
+`Acceptance criteria:` when the change is finished, so the next review of it
+starts at source 3.
 
 Also list the contracts that must not change (existing public API, existing
 tests). If the criteria are unclear or contradictory, ask the user; do not

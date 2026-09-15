@@ -25,11 +25,14 @@ No scripts, no rulesets, no runners, nothing versioned against a tool.
 
 ## The idea: measure against a minimal twin
 
-`minimal-twin-review` does not list smells. It hands the task statement and a
-scratch checkout of the base branch to the **`twin-builder` subagent**, which
-implements the task as small as correctly possible in its own context window —
-it never sees the diff, so it cannot be anchored by it — and then measures the
-real change against that twin:
+`minimal-twin-review` does not list smells. It turns what was asked into a few
+Given/When/Then acceptance criteria — from feature files if the team writes
+them, otherwise from the prompts the harness recorded on the branch, confirmed
+by the developer in one question — and hands those plus a scratch checkout of
+the base branch to the **`twin-builder` subagent**, which makes them pass with
+the least correct code in its own context window. It never sees the diff, and
+the criteria format cannot describe a solution, so it cannot be anchored by
+the change under review. Then the real change is measured against that twin:
 
 - **Verbosity ratio** = lines added ÷ lines the twin needed.
 - **Delete list** = every declaration the real diff added that the twin did
@@ -67,7 +70,7 @@ all repos). Symlink to this pack so updates propagate.
 | Skills | `.tabnine/agent/skills/<name>/SKILL.md` | Agent Skills standard; `.agents/skills/` is an accepted alias. Activated by description or by name. |
 | Commands | `.tabnine/agent/commands/quality-review.toml`, `done.toml` | TOML, `prompt` + `description`, `{{args}}`. |
 | Subagent | `.tabnine/agent/agents/twin-builder.md` | Needs `"experimental": { "enableAgents": true }` in settings. Own context window, tool allowlist, 25 turns / 8 min. |
-| Hook (optional) | merge `hooks/tabnine-settings.json` into `.tabnine/agent/settings.json` | `AfterAgent` fires once per turn; returns `decision: "deny"` with the build output when `gradle check` fails. Needs `jq`. |
+| Hooks (optional, one line each) | merge `hooks/tabnine-settings.json` into `.tabnine/agent/settings.json` | `BeforeAgent` **prompt-log**: records every prompt the developer types to `.git/qc-prompts/<branch>.md` (never committed) so the twin's brief comes from what was actually asked, however disorganised. `AfterAgent` **build-checks**: `gradle check` once per turn, `decision: "deny"` on failure. Needs `jq`. |
 
 No installer: with one harness and eight files, the table above *is* the
 installer. Revisit if a second harness or a third team needs it.
