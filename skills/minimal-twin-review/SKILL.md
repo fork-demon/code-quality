@@ -58,7 +58,8 @@ throw.
 
 Smaller is the yardstick, not the standard. The repo's conventions and the
 `code-quality-core` / `writing-good-tests` skills still say what good code
-looks like, for the change and for the twin alike; a twin that is small by
+looks like, for the change and for the twin alike (the twin builder carries
+those rules in its own prompt, since a subagent cannot load skills); a twin that is small by
 being dense, or by ignoring an existing utility, is wrong — fix it. When the
 twin reused something the change reinvented, the delete-list entry is "use
 the existing X".
