@@ -1,5 +1,5 @@
 # /done — run before declaring a task complete or pushing.
-description = "Finish a task properly: build checks green, minimal-twin review applied, honest summary"
+description = "Finish a task properly: build checks green, quality review applied, honest summary"
 
 prompt = """
 Finish the current task per the `code-quality-core` definition of done:
@@ -7,12 +7,12 @@ Finish the current task per the `code-quality-core` definition of done:
 1. The repository's own checks are green (`./gradlew check` or the build's
    equivalent), fixed at the root cause — never by editing rulesets or adding
    blanket suppressions.
-2. The `minimal-twin-review` skill has been run and its delete list applied,
-   deletions first, then step 1 again.
+2. The `quality-review` skill has been run and its findings applied —
+   deletions first, then fit, then tests — then step 1 again.
 3. Every criterion in the brief has a test at its boundaries.
 4. The brief is recorded on the commit under `Acceptance criteria:`.
 
-Then report: the brief, what was added, what was deleted after the twin
-review with the verbosity ratio before and after, any suppression with its
-justification, anything left open. Only then say the task is done.
+Then report: the brief, what was added, what was deleted or changed after
+the review with the verbosity ratio before and after, any suppression with
+its justification, anything left open. Only then say the task is done.
 """

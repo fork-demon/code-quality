@@ -1,7 +1,7 @@
 ---
 name: twin-builder
 description: >
-  Builds the minimal twin for a quality review: makes a set of Given/When/Then
+  Builds the minimal twin for the quality-review skill: makes a set of Given/When/Then
   acceptance criteria pass in a scratch copy of the base code with the least
   correct code, and reports lines added and declarations added. Invoke it with
   ONLY the criteria (and the contracts that must not change) plus the path of

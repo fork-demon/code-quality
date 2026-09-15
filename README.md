@@ -1,19 +1,19 @@
-# Minimal Twin — a prompt-only quality workflow for the Tabnine agent
+# Quality Review — a prompt-only workflow for AI-generated code (Tabnine agent)
 
 **North star:** with agents generating most of the code, keep quality enforced
 even when a human reviewer misses — using only prompts and the harness's own
 workflow, so there is nothing to maintain as the models move.
 
-CI already has Sonar, Checkstyle, Snyk, tests and PR review agents. They check
-what is *wrong*. None of them check what is *unnecessary*, and that is what
-AI-generated code gets wrong most: interfaces with one implementation, helpers
-with one caller, builders for one field, comments restating code, guards on
-impossible paths, logging at every layer. It passes every gate and compounds
-across hundreds of fast PRs.
+CI already has Sonar, Checkstyle, Snyk, tests and PR review agents. They find
+what is *wrong*. A good senior reviewer asks four more questions that none of
+them can, and those are exactly where fast AI-generated code slips: is any of
+it unnecessary, does it fit this codebase, do the tests really test it, is it
+safe at the edges. This pack makes the agent ask them, with one concrete
+check per question.
 
 ```
-skills/     3 SKILL.md files
-agents/     twin-builder — the isolated subagent that builds the yardstick
+skills/     3 SKILL.md files — code-quality-core, writing-good-tests, quality-review
+agents/     twin-builder — the isolated subagent that builds the yardstick for question 1
 commands/   /quality-review, /done
 hooks/      optional: one line that runs the repo's own `gradle check` at turn end
 demo/       sample repo, verbose vs concise change, recorded real review, deck
@@ -23,29 +23,20 @@ Whole pack: ~300 lines of markdown and TOML.
 
 No scripts, no rulesets, no runners, nothing versioned against a tool.
 
-## The idea: measure against a minimal twin
+## The review: four questions, one check each
 
-`minimal-twin-review` does not list smells. It turns what was asked into a few
-Given/When/Then acceptance criteria — from feature files if the team writes
-them, otherwise from the prompts the harness recorded on the branch, confirmed
-by the developer in one question — and hands those plus a scratch checkout of
-the base branch to the **`twin-builder` subagent**, which makes them pass with
-the least correct code in its own context window. It never sees the diff, and
-the criteria format cannot describe a solution, so it cannot be anchored by
-the change under review. Then the real change is measured against that twin:
+| Question | The check |
+|---|---|
+| **1. Is any of it unnecessary?** | Build a *minimal twin*: the `twin-builder` subagent gets only the brief (Given/When/Then, from feature files or the prompts the harness recorded, confirmed by the developer once) and a checkout of the base, and makes it pass with the fewest new lines. Compare: verbosity ratio, and for every extra thing, "what breaks if I delete it?" |
+| **2. Does it fit this codebase?** | Find the nearest neighbour — the existing code that does the most similar thing — and compare approach, helpers, naming, error handling. "Do it the way X does it" / "use the existing Y". |
+| **3. Do the tests really test it?** | Break the new logic on purpose and run the tests. Still green means not tested. |
+| **4. Is it safe at the edges?** | Walk the exact limit, empty, null, first failure; follow external input to queries, logs, errors; check new entry points against their neighbours' authorisation. |
 
-- **Verbosity ratio** = lines added ÷ lines the twin needed.
-- **Delete list** = every declaration the real diff added that the twin did
-  not, each answered with *what breaks if I delete it?* — by reading the
-  code, not guessing. "Nothing" is a finding.
-- Short tests and security-gap passes for what the twin cannot see.
-
-On the demo change a real run reported: twin +47 lines, actual +368,
-**ratio 7.8x**, seven deletable declarations, one dead null check, one
-log-injection surface. See `demo/sample-review.md`. That is a number to put on
-a slide, and it comes from a prompt. (That run had no subagent available and
-built the twin inline before reading the diff — the isolated version is the
-one to demo.)
+On the demo change a real run of question 1 reported: twin +47 lines, actual
++368, **ratio 7.8x**, seven deletable declarations — and, while reading, a
+dead null check and a log-injection surface (questions 3 and 4). See
+`demo/sample-review.md`. (That run predates the subagent and the other three
+checks; the live review does more.)
 
 ## The workflow
 
@@ -53,8 +44,8 @@ one to demo.)
 |---|---|---|
 | `code-quality-core` | always on | Write the least code that fully solves the task; the delete list; non-negotiables; never edit a gate to pass it; definition of done. |
 | `writing-good-tests` | on tests | Behaviour over implementation, no logic in tests, follow the repo's own fakes. |
-| `/quality-review` | before pushing | The minimal-twin review; offers to apply the delete list. |
-| `/done` | before saying "done" | `gradle check` green → twin review applied → tests at boundaries → honest summary with the ratio before/after. |
+| `/quality-review` | before pushing | The four-question review; offers to apply the findings. |
+| `/done` | before saying "done" | `gradle check` green → review applied → criteria recorded on the commit → honest summary with the ratio before/after. |
 | `hooks/tabnine-settings.json` | optional, once per task | `./gradlew -q check` on task completion; non-zero denies "done". The repo's rules, not ours. |
 
 Nothing runs per iteration. Deterministic rules stay in the build and CI; the
@@ -97,5 +88,5 @@ a quarter, the pack works; if it doesn't, delete the pack.
 |---|---|---|
 | `qcheck.sh` + bundled rulesets after every iteration | Gone. Optional hook runs the repo's own `gradle check` once per task | Deterministic checks belong in the build; a second ruleset drifts; per-iteration blocking interrupts without enforcing |
 | Generic best-practice skills (patterns table, line counts, naming) | Three short skills aimed at over-production | Models know the generic material; the gap is verbosity |
-| Multi-agent lens review | Minimal-twin review | Lenses restate what PR bots do; the twin produces a measurement nothing else does |
+| Multi-agent lens review | Four questions, one concrete check each (twin, nearest neighbour, break-the-logic, edges) | Lenses without instruments restate what PR bots do; each check here produces something they cannot |
 | Scripts to run and parse the review | None — the agent runs it, reads it, applies it | Nothing to maintain as harnesses and models change |

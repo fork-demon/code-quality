@@ -1,8 +1,8 @@
 # /quality-review [optional: the brief in quotes, a .feature path, files, or a branch]
-description = "Minimal-twin review: how much of this change is unnecessary, and is the rest tested and safe"
+description = "Review the current change: unnecessary code, fit with the codebase, real tests, safe edges"
 
 prompt = """
-Review the current change with the `minimal-twin-review` skill.
+Review the current change with the `quality-review` skill.
 
 {{args}}
 
@@ -10,5 +10,5 @@ If the argument is quoted text or a `.feature` path, that is the brief. If
 it is files or a branch, that is the scope. Otherwise review the working-tree
 diff against the base branch (origin/main or origin/master), untracked source
 included, and obtain the brief as the skill describes. Do not modify tracked
-files during the review. End by offering to apply the delete list.
+files during the review. End by offering to apply the findings.
 """
