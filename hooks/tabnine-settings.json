@@ -1,13 +1,16 @@
 {
-  "//": "Merge into <project>/.tabnine/agent/settings.json. Adjust the path to wherever this quality pack is checked out.",
+  "//": "Merge into <project>/.tabnine/agent/settings.json. enableAgents turns on custom subagents (agents/twin-builder.md). The AfterAgent hook is optional: it fires once when the agent finishes a turn — never per tool call — runs the repo's OWN build checks, and on failure returns decision=deny so the agent gets the build output and keeps working. Requires jq. Swap the gradle task for your build (mvn -q verify).",
+  "experimental": { "enableAgents": true },
   "hooks": {
     "AfterAgent": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "bash /path/to/code-quality/hooks/after-iteration.sh --format tabnine",
-            "name": "quality-gate"
+            "name": "build-checks",
+            "description": "Repo build checks must be green before the agent is done",
+            "timeout": 600000,
+            "command": "bash -c 'O=$(./gradlew -q check 2>&1) || jq -n --arg r \"$O\" '\"'\"'{decision:\"deny\",reason:(\"Build checks failed. Fix the code at the root cause — do not edit rulesets, thresholds or add suppressions.\\n\\n\"+$r)}'\"'\"''"
           }
         ]
       }

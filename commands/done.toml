@@ -1,0 +1,20 @@
+# /done — the definition-of-done workflow, run before declaring a task complete or pushing.
+description = "Finish a task properly: build checks green, minimal-twin review applied, honest summary"
+
+prompt = """
+Finish the current task following the `code-quality-core` definition of done:
+
+1. Run the repository's own checks (`./gradlew check`, or the build's
+   equivalent). Fix every finding at the root cause. Never edit rulesets,
+   thresholds, baselines or exclude lists, and never add blanket suppressions;
+   a single-line, single-rule suppression is allowed only for a demonstrable
+   false positive with a justifying comment, and must be listed in step 4.
+2. Run the `minimal-twin-review` skill on the change. Apply the delete list —
+   deletions first — then re-run step 1.
+3. Confirm every new behaviour has a test at its boundaries
+   (`writing-good-tests`).
+4. Report: what the task was, what was added, what was deliberately not
+   added or was deleted after the twin review (with the verbosity ratio
+   before and after), any suppression with its justification, and anything
+   left open. Only then say the task is done.
+"""

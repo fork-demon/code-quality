@@ -1,26 +1,17 @@
-# /quality-review [optional: files, PR, or branch to review]
-# Multi-agent quality review of the current change.
-
-description = "Multi-perspective quality review (design, tests, maintainability, security) of the current diff"
+# /quality-review [files, branch, or diff to review]
+description = "Minimal-twin review: how much of this change is unnecessary, and is the rest tested and safe"
 
 prompt = """
-Run a multi-agent quality review following the `multi-agent-quality-review`
-skill (skills/multi-agent-quality-review/SKILL.md in the quality pack).
+Review the current change with the `minimal-twin-review` skill.
 
 Target: {{args}}
-If no target was given above, review the current working-tree diff against the
-repository's base branch (origin/main or origin/master, whichever exists);
-include untracked source files.
+If none was given, review the working-tree diff against the base branch
+(origin/main or origin/master), including untracked source files.
 
-Steps:
-1. Collect the diff and the surrounding context of each touched file.
-2. Run the four reviewer lenses (design, tests, maintainability, security) —
-   in parallel subagents if this environment supports subagents, otherwise as
-   four separate sequential passes.
-3. Merge per the skill's merge step: dedupe, verify blockers/majors against the
-   real code, then report verdict (pass / pass-with-minors / fail) with
-   findings grouped by severity, each as `file:line — issue — fix`.
-
-Do not modify any code during the review. After reporting, offer to apply the
-fixes.
+Build the twin with the `twin-builder` subagent in a scratch worktree of the
+base branch, giving it only the task statement and that path (fallback if
+subagents are unavailable: build it yourself in the worktree before re-reading
+the diff, and say so in the report). Then measure, justify-or-delete, run the tests and security passes,
+and report in the skill's output format. Do not modify tracked files during
+the review. End by offering to apply the delete list.
 """

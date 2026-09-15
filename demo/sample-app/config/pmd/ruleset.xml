@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<ruleset name="sample-app"
+    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+  <description>Typical correctness-focused PMD rules. Nothing here catches over-production.</description>
+  <rule ref="category/java/errorprone.xml">
+    <exclude name="AvoidLiteralsInIfCondition"/>
+    <exclude name="AvoidFieldNameMatchingMethodName"/>
+    <exclude name="MissingSerialVersionUID"/>
+  </rule>
+  <rule ref="category/java/bestpractices.xml/UnusedPrivateMethod"/>
+  <rule ref="category/java/bestpractices.xml/UnusedLocalVariable"/>
+  <rule ref="category/java/bestpractices.xml/UnusedPrivateField"/>
+  <rule ref="category/java/bestpractices.xml/AvoidPrintStackTrace"/>
+  <rule ref="category/java/bestpractices.xml/SystemPrintln"/>
+  <rule ref="category/java/design.xml/CyclomaticComplexity"/>
+  <rule ref="category/java/design.xml/ExcessiveParameterList"/>
+</ruleset>
