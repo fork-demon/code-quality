@@ -2,3 +2,4 @@
 .qcheck/
 *.log
 .claude/
+demo/run/

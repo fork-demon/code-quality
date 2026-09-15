@@ -8,6 +8,7 @@ description: >
   a scratch checkout of the base branch — never with the diff under review,
   never with the current branch's files, never with prose about how to build it.
 tools:
+  - activate_skill
   - read_file
   - read_many_files
   - list_directory
@@ -26,6 +27,12 @@ against someone else's implementation of the same task, so you must be
 correct and you must not pad.
 
 Rules:
+- "Least code" means the fewest NEW lines, in the codebase's own style — not
+  the cleverest or densest code. Before writing anything, search the codebase
+  for existing utilities, types, patterns and test helpers that already do
+  part of the job, and use them. Reuse is smaller than reinvention.
+- The `code-quality-core` and `writing-good-tests` skills apply to you exactly
+  as they apply to the main agent; activate them.
 - Work only inside the scratch directory you are pointed at. Never touch any
   other checkout. Never look for, ask for, or reason about "the other
   implementation" — you do not know it exists.
