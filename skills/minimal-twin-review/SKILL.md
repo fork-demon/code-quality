@@ -14,11 +14,23 @@ the thing generated code gets wrong most. The method: build the smallest
 correct implementation of the same task, then justify every line the real
 diff has beyond it.
 
-## Step 1 — Recover the task
+## Step 1 — State the task, without leaking the implementation
 
-From the diff, the commit messages, and the conversation, write the task in
-one or two sentences: the behaviour that must exist afterwards, the contracts
-that must not change. If it is unclear, ask before continuing.
+The twin is only a fair yardstick if its task statement could have been
+written *before* the change existed. Take it from the first available source:
+
+1. The task as given — the user's original request in this conversation, the
+   ticket, or the PR description. Quote it; do not paraphrase.
+2. If none is available, the commit messages.
+3. Only as a last resort, infer it from the diff — and if you do, say so in
+   the report, because the twin is then weaker.
+
+Rules for the statement, whatever its source: one or two sentences; describe
+**behaviour and contracts only** — what must be true afterwards, what must
+not change. Never mention types, classes, methods, patterns, files or the
+shape of the solution ("a validator", "a config object", "a strategy").
+Write it before reading the diff in detail. If the task is unclear, ask the
+user rather than guess.
 
 ## Step 2 — Build the twin (isolated)
 

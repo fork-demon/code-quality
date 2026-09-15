@@ -9,8 +9,9 @@ Finish the current task following the `code-quality-core` definition of done:
    thresholds, baselines or exclude lists, and never add blanket suppressions;
    a single-line, single-rule suppression is allowed only for a demonstrable
    false positive with a justifying comment, and must be listed in step 4.
-2. Run the `minimal-twin-review` skill on the change. Apply the delete list —
-   deletions first — then re-run step 1.
+2. Run the `minimal-twin-review` skill on the change, using the user's
+   original request in this conversation, quoted verbatim, as the task
+   statement. Apply the delete list — deletions first — then re-run step 1.
 3. Confirm every new behaviour has a test at its boundaries
    (`writing-good-tests`).
 4. Report: what the task was, what was added, what was deliberately not

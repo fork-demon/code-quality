@@ -1,12 +1,16 @@
-# /quality-review [files, branch, or diff to review]
+# /quality-review ["what the change was meant to do" | files | branch]
 description = "Minimal-twin review: how much of this change is unnecessary, and is the rest tested and safe"
 
 prompt = """
 Review the current change with the `minimal-twin-review` skill.
 
-Target: {{args}}
-If none was given, review the working-tree diff against the base branch
-(origin/main or origin/master), including untracked source files.
+Argument: {{args}}
+If it is a quoted sentence, treat it as the task statement (skill step 1,
+source 1) and review the working-tree diff against the base branch. If it is a
+path or branch, review that. If empty, review the working-tree diff against the
+base branch (origin/main or origin/master), including untracked source files,
+and take the task statement from the conversation or commit messages — never
+from the shape of the diff.
 
 Build the twin with the `twin-builder` subagent in a scratch worktree of the
 base branch, giving it only the task statement and that path (fallback if
