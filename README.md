@@ -1,8 +1,8 @@
-# Quality Review — a prompt-only workflow for AI-generated code (Tabnine agent)
+# Code Quality: a prompt-only review workflow for AI-generated code
 
-**North star:** with agents generating most of the code, keep quality enforced
-even when a human reviewer misses — using only prompts and the harness's own
-workflow, so there is nothing to maintain as the models move.
+**Goal:** with agents writing most of the code, keep quality enforced even when
+a human reviewer misses, using only prompts and the harness's own workflow, so
+there is nothing to maintain as the models move.
 
 CI already has Sonar, Checkstyle, Snyk, tests and PR review agents. They find
 what is *wrong*. A good senior reviewer asks four more questions that none of
@@ -16,7 +16,7 @@ skills/     3 SKILL.md files — code-quality-core, writing-good-tests, quality-
 agents/     twin-builder — the isolated subagent that builds the yardstick for question 1
 commands/   /quality-review, /done
 hooks/      optional: one line that runs the repo's own `gradle check` at turn end
-demo/       sample repo, verbose vs concise change, recorded real review, deck
+demo/       sample repo, verbose vs concise change, recorded real review, deck (code-quality.pptx)
 ```
 
 Whole pack: ~300 lines of markdown and TOML.
