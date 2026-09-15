@@ -1,23 +1,14 @@
-# /quality-review ["Given … When … Then …" criteria | path to .feature | files | branch]
+# /quality-review [optional: the brief in quotes, a .feature path, files, or a branch]
 description = "Minimal-twin review: how much of this change is unnecessary, and is the rest tested and safe"
 
 prompt = """
 Review the current change with the `minimal-twin-review` skill.
 
-Argument: {{args}}
-If it is quoted text or a `.feature` path, treat it as the acceptance
-criteria (skill step 1) and review the working-tree diff against the base
-branch. If it is a
-path or branch, review that. If empty, review the working-tree diff against the
-base branch (origin/main or origin/master), including untracked source files,
-and take the criteria per the skill's step 1 ladder (feature files, then
-recorded criteria, then extracted from tests and behaviour — never from the
-shape of the diff).
+{{args}}
 
-Build the twin with the `twin-builder` subagent in a scratch worktree of the
-base branch, giving it only the task statement and that path (fallback if
-subagents are unavailable: build it yourself in the worktree before re-reading
-the diff, and say so in the report). Then measure, justify-or-delete, run the tests and security passes,
-and report in the skill's output format. Do not modify tracked files during
-the review. End by offering to apply the delete list.
+If the argument is quoted text or a `.feature` path, that is the brief. If
+it is files or a branch, that is the scope. Otherwise review the working-tree
+diff against the base branch (origin/main or origin/master), untracked source
+included, and obtain the brief as the skill describes. Do not modify tracked
+files during the review. End by offering to apply the delete list.
 """

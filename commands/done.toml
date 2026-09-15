@@ -1,28 +1,18 @@
-# /done — the definition-of-done workflow, run before declaring a task complete or pushing.
+# /done — run before declaring a task complete or pushing.
 description = "Finish a task properly: build checks green, minimal-twin review applied, honest summary"
 
 prompt = """
-Finish the current task following the `code-quality-core` definition of done:
+Finish the current task per the `code-quality-core` definition of done:
 
-1. Run the repository's own checks (`./gradlew check`, or the build's
-   equivalent). Fix every finding at the root cause. Never edit rulesets,
-   thresholds, baselines or exclude lists, and never add blanket suppressions;
-   a single-line, single-rule suppression is allowed only for a demonstrable
-   false positive with a justifying comment, and must be listed in step 4.
-2. Build the acceptance criteria per the `minimal-twin-review` skill's
-   step 1 ladder: `*.feature` scenarios in the diff verbatim; else the
-   harness prompt log `.git/qc-prompts/<branch>.md` (all prompts on this
-   branch, corrections included, last word wins); else this conversation.
-   Condense to 3–6 Given/When/Then scenarios, ask "is this what you asked
-   for?", and wait for confirmation.
-3. Run the `minimal-twin-review` skill with the confirmed criteria as the
-   brief. Apply the delete list — deletions first — then re-run step 1.
-4. Confirm every criterion has a test at its boundaries
-   (`writing-good-tests`).
-5. Put the confirmed criteria in the commit message under
-   `Acceptance criteria:` so any later review has a deterministic brief.
-6. Report: the criteria, what was added, what was deliberately not added or
-   was deleted after the twin review (with the verbosity ratio before and
-   after), any suppression with its justification, and anything left open.
-   Only then say the task is done.
+1. The repository's own checks are green (`./gradlew check` or the build's
+   equivalent), fixed at the root cause — never by editing rulesets or adding
+   blanket suppressions.
+2. The `minimal-twin-review` skill has been run and its delete list applied,
+   deletions first, then step 1 again.
+3. Every criterion in the brief has a test at its boundaries.
+4. The brief is recorded on the commit under `Acceptance criteria:`.
+
+Then report: the brief, what was added, what was deleted after the twin
+review with the verbosity ratio before and after, any suppression with its
+justification, anything left open. Only then say the task is done.
 """
