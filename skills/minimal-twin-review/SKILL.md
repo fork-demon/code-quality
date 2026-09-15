@@ -43,6 +43,13 @@ Whatever the source, the criteria go into the commit message under
 `Acceptance criteria:` when the change is finished, so the next review of it
 starts at source 3.
 
+Before asking for confirmation, reconcile against the change itself: list
+any observable behaviour the diff adds that no source above mentions (a
+developer may have added it by hand in the IDE) and ask whether it belongs in
+the criteria. Describe it as behaviour, never as structure. Everything in the
+diff is measured regardless of who or what wrote it; this step only makes
+sure the brief is complete.
+
 Also list the contracts that must not change (existing public API, existing
 tests). If the criteria are unclear or contradictory, ask the user; do not
 guess.
@@ -78,8 +85,9 @@ caller inlined?* Read the code; do not guess.
 - Only tests of the scaffolding itself break → **delete both**.
 - A real behaviour breaks that the twin also has → the twin is wrong; fix it
   and recount.
-- A real behaviour breaks that the twin lacks → the task statement was
-  incomplete; add it to the task and keep the declaration.
+- A real behaviour breaks that the twin lacks → the criteria were
+  incomplete; keep the declaration, add the behaviour to the criteria, send
+  the addition to `twin-builder` to extend the twin, and recount the ratio.
 
 Then run the same question over the non-declaration additions: comments and
 Javadoc that restate the code, null/try-catch guards on paths that cannot
