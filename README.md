@@ -1,4 +1,4 @@
-# Code Quality: a prompt-only review workflow for AI-generated code
+# Minimal Twin: a prompt-only review workflow for AI-generated code
 
 **Goal:** with agents writing most of the code, keep quality enforced even when
 a human reviewer misses, using only prompts and the harness's own workflow, so
