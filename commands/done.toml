@@ -1,18 +1,23 @@
-# /done — run before declaring a task complete or pushing.
+# /done and run before declaring a task complete or pushing.
 description = "Finish a task properly: build checks green, quality review applied, honest summary"
 
 prompt = """
 Finish the current task per the `code-quality-core` definition of done:
 
 1. The repository's own checks are green (`./gradlew check` or the build's
-   equivalent), fixed at the root cause — never by editing rulesets or adding
+   equivalent), fixed at the root cause and never by editing rulesets or adding
    blanket suppressions.
-2. The `quality-review` skill has been run and its findings applied —
-   deletions first, then fit, then tests — then step 1 again.
+2. The `quality-review` skill has been run and its findings applied ,
+   deletions first, then fit, then tests and then step 1 again.
 3. Every criterion in the brief has a test at its boundaries.
-4. The brief is recorded on the commit under `Acceptance criteria:`.
 
 Then report: the brief, what was added, what was deleted or changed after
 the review with the verbosity ratio before and after, any suppression with
-its justification, anything left open. Only then say the task is done.
+its justification, anything left open.
+
+Finally, show a commit message ready to use: a one-line summary, then
+`Acceptance criteria:` with the brief, then `Quality review:` with the ratio
+before and after. Ask "commit with this message?" and commit only if the
+developer says yes. Never commit or push on your own. Only then say the task
+is done.
 """
